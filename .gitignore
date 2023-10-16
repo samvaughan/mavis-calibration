@@ -1,0 +1,13 @@
+*.DS_Store
+*.fits
+.tox
+.pytest_cache
+*.FIT
+*.fits
+*.pyc
+*.png
+
+# Ignore the raw data
+src/data
+src/results
+.snakemake
