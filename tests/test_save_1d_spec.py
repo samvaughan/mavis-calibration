@@ -2,10 +2,11 @@ from src.scripts import save_1d_spec as script
 import numpy as np
 import pytest
 from astropy.io import fits
+from pathlib import Path
 
 # Some test data we have
-filename = "tests/test_data/Photron_ThAr_Red_60s_02.fits"
-dark_filename = "tests/test_data/Dark_Red_60s.fits"
+filename = Path("tests/test_data/Photron_ThAr_Red_60s_02.fits")
+dark_filename = Path("tests/test_data/Dark_Red_60s.fits")
 
 
 @pytest.mark.parametrize("filename", [filename])

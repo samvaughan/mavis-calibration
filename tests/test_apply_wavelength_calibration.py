@@ -8,9 +8,8 @@ oned_spec_filename = "tests/test_data/Photron_ThAr_Red_60s_02_1dspec.fits"
 
 @pytest.mark.parametrize("oned_spec_filename", [oned_spec_filename])
 def test_spectrum_has_correct_wavelength_calibration(oned_spec_filename, tmp_path):
-    output_plot = tmp_path / "test_wavecal.png"
     output_1dspec = tmp_path / "test_wavecal.fits"
-    wavecal.main(oned_spec_filename, output_1dspec, output_plot)
+    wavecal.main(oned_spec_filename, output_1dspec)
 
     # Assert that we have the correct WCS
     hdu = fits.open(output_1dspec)
