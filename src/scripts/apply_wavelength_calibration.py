@@ -11,9 +11,6 @@ TODO:
 """
 from astropy.io import fits
 from astropy.wcs import WCS
-import matplotlib.pyplot as plt
-import numpy as np
-from scripts import paths
 import argparse
 from pathlib import Path
 
@@ -21,7 +18,6 @@ from pathlib import Path
 def main(
     onedspec_file,
     wavelength_calibrated_output_file,
-    output_plot,
 ):
     # Open the spectrum
     hdu = fits.open(onedspec_file)
@@ -44,14 +40,14 @@ def main(
     hdu[0].header.extend(wcs.to_header())
     hdu.writeto(wavelength_calibrated_output_file, overwrite=True)
 
-    # Now make a QC plot
-    wcs = WCS(hdu[0].header)
-    wave = wcs.pixel_to_world_values(np.arange(naxis))
-    fig, ax = plt.subplots(constrained_layout=True)
-    ax.plot(wave, spec, c="k")
-    ax.set_xlabel("Wavelength (Angstroms)")
-    ax.set_ylabel("Counts")
-    fig.savefig(output_plot)
+    # # Now make a QC plot
+    # wcs = WCS(hdu[0].header)
+    # wave = wcs.pixel_to_world_values(np.arange(naxis))
+    # fig, ax = plt.subplots(constrained_layout=True)
+    # ax.plot(wave, spec, c="k")
+    # ax.set_xlabel("Wavelength (Angstroms)")
+    # ax.set_ylabel("Counts")
+    # fig.savefig(output_plot)
 
 
 if __name__ == "__main__":
@@ -65,18 +61,6 @@ if __name__ == "__main__":
 
     onedspec_file = Path(onedspec_file)
     wavelength_calibrated_output_file = Path(wavelength_calibrated_output_file)
-    output_plot = paths.plots / f"{onedspec_file.stem}_cal.png"
-
-    # smk = snakemake  # noqa
-    # onedspec_file = paths.oned_spec / "Photron_ThAr_Red_60s_02_1dspec.fits"
-    # wavelength_calibrated_output_file = (
-    #     paths.wave_calibrated / "Photron_ThAr_Red_60s_02_1dspec_cal.fits"
-    # )
-    # output_plot = paths.plots / "Photron_ThAr_Red_60s_02_1d_spec_cal.png"
 
     # Run the script
-    main(
-        onedspec_file,
-        wavelength_calibrated_output_file,
-        output_plot,
-    )
+    main(onedspec_file, wavelength_calibrated_output_file)

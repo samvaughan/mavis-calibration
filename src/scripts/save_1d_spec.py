@@ -54,9 +54,20 @@ def main(filename, dark_filename, output_plot, output_1dspec):
 
     hdu = fits.open(filename)
 
-    dark_hdu = fits.open(dark_filename)
-    dark_image = dark_hdu[0].data
-
+    # Subtract off our dark if we have one.
+    # If we have a dark, it will be a .fits file
+    # If not, I've set things up so we have a file called "no_dark.flag".
+    # In this case, just nanmedian the data and check it's roughly 500
+    if dark_filename.suffix == ".fits":
+        dark_hdu = fits.open(dark_filename)
+        dark_image = dark_hdu[0].data
+    elif dark_filename.suffix == ".flag":
+        dark_image = np.nanmedian(hdu[0].data)
+        assert (
+            450 < dark_image < 550
+        ), f"The bias level should be around 500! It's currently {dark_image}"
+    else:
+        raise NameError("I don't understand the dark file we've been passed")
     # Subtract off the dark frame
     oned_spec = np.sum(hdu[0].data - dark_image, axis=0)
 
@@ -80,9 +91,9 @@ def main(filename, dark_filename, output_plot, output_1dspec):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("filename")
-    parser.add_argument("dark_filename")
     parser.add_argument("output_1dspec")
     parser.add_argument("output_plot")
+    parser.add_argument("--dark_filename", default="")
 
     args = parser.parse_args()
     filename = Path(args.filename)

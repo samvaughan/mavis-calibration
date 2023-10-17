@@ -52,19 +52,68 @@ df = pd.DataFrame(
         exposure_time=all_exposure_times,
     )
 )
+df["has_dark"] = True
 
-# At the moment, drop the Newport lamps
-df = df.loc[df.manufacturer != "Newport"]
-# Also drop the 10 second Red exposure as we're missing a dark for it
-df = df.drop(
-    df.loc[
-        (df.manufacturer == "GS")
-        & (df.exposure_time == "10s")
-        & (df.ccd_color == "Red")
-    ].index
+
+# Mark things we don't have darks for
+mask_1 = (
+    (df.manufacturer == "GS") & (df.exposure_time == "10s") & (df.ccd_colour == "Red")
 )
+mask_2 = (
+    (df.manufacturer == "Newport")
+    & (df.exposure_time == "90s")
+    & (df.ccd_colour == "Red")
+    & (df.lamp_type == "HgAr")
+)
+mask_3 = (
+    (df.manufacturer == "Newport")
+    & (df.exposure_time == "10s")
+    & (df.ccd_colour == "Blue")
+    & (df.lamp_type == "HgAr")
+)
+mask_4 = (
+    (df.manufacturer == "Newport")
+    & (df.exposure_time == "10s")
+    & (df.ccd_colour == "Blue")
+    & (df.lamp_type == "HgNe")
+)
+mask_5 = (
+    (df.manufacturer == "Newport")
+    & (df.exposure_time == "60s")
+    & (df.ccd_colour == "Blue")
+    & (df.lamp_type == "HgNe")
+)
+mask_6 = (
+    (df.manufacturer == "Newport")
+    & (df.exposure_time == "600s")
+    & (df.ccd_colour == "Blue")
+    & (df.lamp_type == "Kr")
+)
+no_dark_mask = mask_1 | mask_2 | mask_3 | mask_4 | mask_5 | mask_6
+
+df.loc[no_dark_mask, "has_dark"] = False
 
 
+def get_dark_filename(wildcards):
+    mask = (
+        (df.manufacturer == f"{wildcards.lamp_manufacturer}")
+        & (df.exposure_time == f"{wildcards.exposure_time}")
+        & (df.ccd_colour == f"{wildcards.ccd_colour}")
+        & (df.lamp_type == f"{wildcards.LampType}")
+        & (df.ID_number == f"{wildcards.id_number}")
+    )
+    assert (
+        mask.sum() == 1
+    ), "This mask should always only have one True value in it... Check the wildcards!"
+    has_dark = df.loc[mask, "has_dark"].values[0]
+    if has_dark:
+        filename = f"src/data/raw/{wildcards.lamp_manufacturer}_{wildcards.LampType}_{wildcards.ccd_colour}_fits/Dark_{wildcards.ccd_colour}_{wildcards.exposure_time}.fits"
+    else:
+        filename = "src/data/raw/no_dark.flag"
+    return filename
+
+
+# The Snakemake rules
 rule all:
     input:
         results=expand(
@@ -80,13 +129,13 @@ rule all:
 
 rule save_1D_spec:
     input:
-        dark_frame="src/data/raw/{lamp_manufacturer}_{LampType}_{ccd_colour}_fits/Dark_{ccd_colour}_{exposure_time}.fits",
+        dark_frame=get_dark_filename,
         raw_spectrum="src/data/raw/{lamp_manufacturer}_{LampType}_{ccd_colour}_fits/{lamp_manufacturer}_{LampType}_{ccd_colour}_{exposure_time}_{id_number}.fits",
     output:
         oned_spectrum="src/data/processed/oned_spectra/{lamp_manufacturer}_{LampType}_{ccd_colour}_{exposure_time}_{id_number}_1dspec.fits",
         oned_plot="src/results/plots/oned_spectra/{lamp_manufacturer}_{LampType}_{ccd_colour}_{exposure_time}_{id_number}_plot.png",
     shell:
-        "python src/scripts/save_1d_spec.py {input.raw_spectrum} {input.dark_frame} {output.oned_spectrum} {output.oned_plot}"
+        "python src/scripts/save_1d_spec.py {input.raw_spectrum} {output.oned_spectrum} {output.oned_plot} --dark_filename {input.dark_frame}"
 
 
 rule wavelength_calibration:
@@ -104,8 +153,9 @@ rule measure_fluxes:
         linelist_file="src/data/resources/linelist_{LampType}_{ccd_colour}.csv",
     output:
         final_table="src/results/{lamp_manufacturer}_{LampType}_{ccd_colour}_{exposure_time}_{id_number}_1dspec_cal_fluxes.csv",
+        output_plot="src/results/plots/lines_measured/{lamp_manufacturer}_{LampType}_{ccd_colour}_{exposure_time}_{id_number}_1dspec_cal_fluxes.png",
     shell:
-        "python src/scripts/measure_fluxes.py {input.wavecal_spectrum} {output.final_table} {input.linelist_file}"
+        "python src/scripts/measure_fluxes.py {input.wavecal_spectrum} {output.final_table} {input.linelist_file} {output.output_plot}"
 
 
 # # We have 12 photron exposures with the following parameters

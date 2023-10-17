@@ -17,8 +17,11 @@ def test_measure_fluxes_gives_table_with_correct_column_names(
     oned_spec_calibrated_filename, table_filename, tmp_path
 ):
     output_table = tmp_path / "test.csv"
+    output_plot = tmp_path / "plot.png"
     # Run the script
-    measure_fluxes.main(oned_spec_calibrated_filename, output_table, table_filename)
+    measure_fluxes.main(
+        oned_spec_calibrated_filename, output_table, table_filename, output_plot
+    )
 
     # read in the output file
     df = pd.read_csv(output_table)

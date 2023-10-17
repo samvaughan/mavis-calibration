@@ -8,6 +8,6 @@
 *.png
 
 # Ignore the raw data
-src/data
-src/results
+src/data/raw
+src/data/processed
 .snakemake

@@ -14,10 +14,10 @@ ToDo:
 
 from astropy.io import fits
 import numpy as np
-from scripts import paths
 import pandas as pd
 from astropy.wcs import WCS
 import argparse
+import matplotlib.pyplot as plt
 
 
 def measure_flux(wavelength, spectrum, linelist):
@@ -30,14 +30,12 @@ def measure_flux(wavelength, spectrum, linelist):
     return fluxes
 
 
-def main(input_spectrum, output_table, table_filename):
+def main(input_spectrum, output_table, table_filename, output_plot_filename):
     # Load the file and get the CCD
     hdu = fits.open(input_spectrum)
     spectrum = hdu[0].data
     wcs = WCS(hdu[0].header)
     wavelength = wcs.pixel_to_world_values(np.arange(hdu[0].header["NAXIS1"]))
-    ccd = hdu[0].header["CCD"]
-    lamp_type = hdu[0].header["LAMP"]
 
     # Now get the appropriate table file
     linelist = pd.read_csv(table_filename)
@@ -65,18 +63,36 @@ def main(input_spectrum, output_table, table_filename):
     # Now save the final file to a .csv file
     linelist.loc[:, ["pixel", "Wavelength", "Flux"]].to_csv(output_table, index=False)
 
+    # Finally, make a plot showing the locations of each line
+    fig, ax = plt.subplots(constrained_layout=True)
+    ax.plot(wavelength, spectrum, c="k")
+    for index, row in linelist.iterrows():
+        ax.axvspan(
+            row["line_start"],
+            row["line_end"],
+            alpha=0.6,
+            facecolor="r",
+            linewidth=2.0,
+            linestyle="dashed",
+        )
+    ax.set_xlabel("Wavelength (Angstrom)")
+    ax.set_ylabel("Flux")
+    fig.savefig(output_plot_filename, bbox_inches="tight")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("input_spectrum")
     parser.add_argument("output_table")
     parser.add_argument("table_filename")
+    parser.add_argument("output_plot")
 
     args = parser.parse_args()
     input_spectrum = args.input_spectrum
     output_table = args.output_table
     table_filename = args.table_filename
+    output_plot = args.output_plot
     # input_spectrum = paths.wave_calibrated / "Photron_ThAr_Red_60s_02_1dspec_cal.fits"
     # output_table = paths.results / "Photron_ThAr_Red_60s_02_1dspec_cal_fluxes.csv"
     # table_filename = paths.resources / "linelist_ThAr_Red.csv"
-    main(input_spectrum, output_table, table_filename)
+    main(input_spectrum, output_table, table_filename, output_plot)
