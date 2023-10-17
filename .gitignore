@@ -7,6 +7,9 @@
 *.pyc
 *.png
 
+# But we do want to add our test data
+!tests/test_data/*.fits
+
 # Ignore the raw data
 src/data/raw
 src/data/processed
