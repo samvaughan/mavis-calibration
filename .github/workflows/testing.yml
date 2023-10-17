@@ -1,4 +1,4 @@
-name: Mavis calibration project
+name: tox tests
 
 on:
   - push
