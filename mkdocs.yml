@@ -1,4 +1,11 @@
 site_name: MAVIS-calibration
 
-site_url: https://samvaughan.github.io/mavis-calibration/
+site_url: https://samvaughan.github.io/mavis-calibration
 repo_url: https://github.com/samvaughan/mavis-calibration
+repo_name: samvaughan/mavis-calibration
+
+edit_uri: edit/main/docs/
+
+theme:
+  icon:
+    repo: fontawesome/brands/github 
