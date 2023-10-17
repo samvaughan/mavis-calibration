@@ -14,7 +14,9 @@ A short summary of all of these is below.
 
 ## Running this code
 
-If you'd like to run the code, please clone the repo, create a new python environment (with either `conda` or `venv`) and run `pip install .` from the main folder. You'll also need the raw data which I've prepared (by editing some filenames, etc). I've passed this on to Richard McDermid. 
+If you'd like to run the code, please clone the repo, create a new python environment (with either `conda` or `venv`) and run `pip install .` from the main folder. You'll also need the raw data which I've prepared (by editing some filenames, etc). I've passed this on to Richard McDermid. Place it in the `src/data/raw` folder.
+
+You can then run `snakemake --cores 1` from the main folder to re-run the analysis on all of the files. It should take a couple of minutes to finish.
 
 ## The analysis steps
 
