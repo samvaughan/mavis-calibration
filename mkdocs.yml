@@ -9,3 +9,5 @@ edit_uri: edit/main/docs/
 theme:
   icon:
     repo: fontawesome/brands/github 
+  features:
+    - content.action.edit
