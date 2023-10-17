@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="None">
+        
+        
+        <link rel="shortcut icon" href="img/favicon.ico">
+        <title>MAVIS-calibration</title>
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/font-awesome.min.css" rel="stylesheet">
+        <link href="css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body class="homepage">
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href=".">MAVIS-calibration</a>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#homepage" class="nav-link">Homepage</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#mavis-calibration-tests-using-hector-data" class="nav-link">MAVIS calibration tests using Hector data</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#running-this-code" class="nav-link">Running this code</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#the-analysis-steps" class="nav-link">The analysis steps</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="homepage">Homepage</h1>
+<h1 id="mavis-calibration-tests-using-hector-data">MAVIS calibration tests using Hector data</h1>
+<p>This repository contains code which takes some raw exposures of various different Hector calibration lamps and measures their fluxes in ADU/s as a function of wavelength. This will be useful for the MAVIS team.</p>
+<p>The analysis steps are:</p>
+<ul>
+<li>Subtract off the dark frames and the bias level and turn the 2D image into a 1D spectrum (<code>save_1d_spec.py</code>).</li>
+<li>Get a wavelength calibration for the spectrum.</li>
+<li>Find some bright lines and measure their fluxes by summing across a range of pixels.</li>
+</ul>
+<p>A short summary of all of these is below.</p>
+<h2 id="running-this-code">Running this code</h2>
+<p>If you'd like to run the code, please clone the repo, create a new python environment (with either <code>conda</code> or <code>venv</code>) and run <code>pip install .</code> from the main folder. You'll also need the raw data which I've prepared (by editing some filenames, etc). I've passed this on to Richard McDermid. </p>
+<h2 id="the-analysis-steps">The analysis steps</h2>
+<h3 id="making-1d-spectra">Making 1D spectra</h3>
+<p>The file <code>src/scripts/save_1d_spec.py</code> does the following things:</p>
+<ul>
+<li>Reads the input file.</li>
+<li>Subtracts the bias from the image. If we have a dark frame, this is subtracted. Otherwise, we calculate a bias level using <code>np.nanmedian(image)</code>. There's a check to make sure that this value isn't huge or tiny, but this really isn't very accurate. Be careful about using the files which don't have dark exposures!</li>
+<li>Gets the exposure time and the arc lamp name from the filename.</li>
+<li>Sums the image along the spatial dimension <code>(axis=0)</code> to go from 2D to 1D.</li>
+<li>Saves a plot of this spectrum for QC.</li>
+<li>Saves a 1D fits file with appropriate header keywords.</li>
+</ul>
+<p>The raw input images look like this:</p>
+<p><img alt="2D image" src="images/2d_image.png" /></p>
+<p>Note that there looks to be a bias difference on each half of the detector: it's roughly 500 counts on the left and 504 on the right. This is currently ignored in the analysis when we don't have a dark frame. </p>
+<p>We then collapse them down into a 1D spectrum, which looks like this:</p>
+<p><img alt="A 1D spectrum of a Photron ThAr lamp in the red" src="images/Photron_ThAr_Red_60s_02_1d_spec.png" /></p>
+<h3 id="getting-a-wavelength-calibration">Getting a wavelength calibration</h3>
+<p>I'm assuming that the wavelength calibration for this data is roughly the same as previously reduced Hector data, so I'm using the same calibration as there. This is probably only good to a few Angstroms or so (2-5 pixels).</p>
+<p>Looking at a handful of previously reduced arc frames, their wavelength solutions are below. For the blue:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">CRVAL</th>
+<th style="text-align: left;">CRPIX</th>
+<th style="text-align: left;">CDELT</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">0.542...</td>
+<td style="text-align: left;">2048</td>
+<td style="text-align: left;">4837.4...</td>
+</tr>
+<tr>
+<td style="text-align: left;">0.547...</td>
+<td style="text-align: left;">2048</td>
+<td style="text-align: left;">4799.7...</td>
+</tr>
+<tr>
+<td style="text-align: left;">0.547...</td>
+<td style="text-align: left;">2048</td>
+<td style="text-align: left;">4799.7...</td>
+</tr>
+<tr>
+<td style="text-align: left;">0.547...</td>
+<td style="text-align: left;">2048</td>
+<td style="text-align: left;">4799.7...</td>
+</tr>
+<tr>
+<td style="text-align: left;">0.542...</td>
+<td style="text-align: left;">2048</td>
+<td style="text-align: left;">4837.4...</td>
+</tr>
+<tr>
+<td style="text-align: left;">0.547...</td>
+<td style="text-align: left;">2048</td>
+<td style="text-align: left;">4799.7...</td>
+</tr>
+<tr>
+<td style="text-align: left;">0.547...</td>
+<td style="text-align: left;">2048</td>
+<td style="text-align: left;">4799.7...</td>
+</tr>
+</tbody>
+</table>
+<p>and for the red:</p>
+<table>
+<thead>
+<tr>
+<th>CRVAL</th>
+<th>CRPIX</th>
+<th>CDELT</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.520...</td>
+<td>2048</td>
+<td>6754.7...</td>
+</tr>
+<tr>
+<td>0.518...</td>
+<td>2048</td>
+<td>6781.9...</td>
+</tr>
+<tr>
+<td>0.518...</td>
+<td>2048</td>
+<td>6781.9...</td>
+</tr>
+<tr>
+<td>0.520...</td>
+<td>2048</td>
+<td>6754.7...</td>
+</tr>
+<tr>
+<td>0.520...</td>
+<td>2048</td>
+<td>6754.7...</td>
+</tr>
+<tr>
+<td>0.520...</td>
+<td>2048</td>
+<td>6754.7...</td>
+</tr>
+<tr>
+<td>0.520...</td>
+<td>2048</td>
+<td>6754.7...</td>
+</tr>
+<tr>
+<td>0.520...</td>
+<td>2048</td>
+<td>6754.7...</td>
+</tr>
+<tr>
+<td>0.520...</td>
+<td>2048</td>
+<td>6754.7...</td>
+</tr>
+<tr>
+<td>0.520...</td>
+<td>2048</td>
+<td>6754.7...</td>
+</tr>
+</tbody>
+</table>
+<p>I'm therefore going to take the most common wavelength solution here: (0.5470085470085, 2048, 4799.726495726) for the blue and (0.5201465201465, 2048, 6754.73992674) for the red.</p>
+<h3 id="summing-the-emission-lines-to-measure-fluxes">Summing the emission lines to measure fluxes</h3>
+<p>The file <code>measure_line_fluxes.py</code> does the following things:</p>
+<ul>
+<li>Reads in a <code>.csv</code> file which has the line definitions (start, stop in pixels)</li>
+<li>Sums the flux between these wavelengths</li>
+<li>Calculates the number of ADUs per second by dividing by the exposure time and the number of fibres in a Hexabundle (which is 61).</li>
+<li>Saves the table with all these measurements in.</li>
+<li>Saves a QC plot of where the line definitions are in the spectrum, an example of which is shown below.</li>
+</ul>
+<p><img alt="An example spectrum showing where the fluxes are summed over" src="images/Newport_Ne_Blue_300s_02_1dspec_cal_fluxes.png" /></p>
+<p>The final tables are saved in <code>src/data/results</code> as a <code>.csv</code> file. The columns are "pixel", which gives the central pixel of the line, "Wavelength", which gives the central wavelength of the line, and "Flux", which is the number of ADUs per second measured for that line.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="js/jquery-3.6.0.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script>
+            var base_url = ".",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="js/base.js"></script>
+
+        <div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
+
+<!--
+MkDocs version : 1.5.3
+Build Date UTC : 2023-10-17 02:05:13.314347+00:00
+-->
