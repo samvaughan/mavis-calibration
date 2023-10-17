@@ -9,6 +9,8 @@
 
 # But we do want to add our test data
 !tests/test_data/*.fits
+# And our documentation images
+!docs/img/*.png
 
 # Ignore the raw data
 src/data/raw
