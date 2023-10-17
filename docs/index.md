@@ -6,9 +6,9 @@ This repository contains code which takes some raw exposures of various differen
 
 The analysis steps are:
 
-* Subtract off the dark frames and the bias level and turn the 2D image into a 1D spectrum (`save_1d_spec.py`).
-* Get a wavelength calibration for the spectrum.
-* Find some bright lines and measure their fluxes by summing across a range of pixels.
+* Subtract off the dark frame (if we have one) or just the bias level (if we don't) and turn the 2D image into a 1D spectrum (`save_1d_spec.py`).
+* Get a wavelength calibration for the spectrum (`apply_wavelength_calibration.py`).
+* Find some bright lines and measure their fluxes by summing across a range of pixels (`measure_fluxes.py`).
 
 A short summary of all of these is below.
 
@@ -80,7 +80,7 @@ I'm therefore going to take the most common wavelength solution here: (0.5470085
 
 The file `measure_line_fluxes.py` does the following things:
 
-* Reads in a `.csv` file which has the line definitions (start, stop in pixels)
+* Reads in a `.csv` file which has the line definitions (start, stop in Angstroms)
 * Sums the flux between these wavelengths
 * Calculates the number of ADUs per second by dividing by the exposure time and the number of fibres in a Hexabundle (which is 61).
 * Saves the table with all these measurements in.
