@@ -31,13 +31,13 @@ The file `src/scripts/save_1d_spec.py` does the following things:
 
 The raw input images look like this:
 
-![2D image](images/2d_image.png)
+![2D image](docs/images/2d_image.png)
 
 Note that there looks to be a bias difference on each half of the detector: it's roughly 500 counts on the left and 504 on the right. This is currently ignored in the analysis when we don't have a dark frame. 
 
 We then collapse them down into a 1D spectrum, which looks like this:
 
-![A 1D spectrum of a Photron ThAr lamp in the red](images/Photron_ThAr_Red_60s_02_1d_spec.png)
+![A 1D spectrum of a Photron ThAr lamp in the red](docs/images/Photron_ThAr_Red_60s_02_1d_spec.png)
 
 ### Getting a wavelength calibration
 
@@ -84,6 +84,6 @@ The file `measure_line_fluxes.py` does the following things:
 * Saves the table with all these measurements in.
 * Saves a QC plot of where the line definitions are in the spectrum, an example of which is shown below.
 
-![An example spectrum showing where the fluxes are summed over](images/Newport_Ne_Blue_300s_02_1dspec_cal_fluxes.png)
+![An example spectrum showing where the fluxes are summed over](docs/images/Newport_Ne_Blue_300s_02_1dspec_cal_fluxes.png)
 
 The final tables are saved in `src/data/results` as a `.csv` file. The columns are "pixel", which gives the central pixel of the line, "Wavelength", which gives the central wavelength of the line, and "Flux", which is the number of ADUs per second measured for that line.
