@@ -8,5 +8,6 @@ Requires-Dist: numpy
 Requires-Dist: astropy
 Requires-Dist: matplotlib
 Requires-Dist: pandas
+Requires-Dist: snakemake
 Provides-Extra: dev
 Requires-Dist: tox; extra == "dev"

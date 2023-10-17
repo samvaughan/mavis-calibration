@@ -9,8 +9,8 @@ dependencies = [
     "numpy",
     "astropy",
     "matplotlib",
-    "pandas"
-
+    "pandas",
+    "snakemake"
 ]
 
 [project.optional-dependencies]
